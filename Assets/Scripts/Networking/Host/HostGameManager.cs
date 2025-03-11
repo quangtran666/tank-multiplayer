@@ -85,7 +85,22 @@ public class HostGameManager : IAsyncDisposable
         NetworkServer = new NetworkServer(NetworkManager.Singleton);
 
         NetworkManager.Singleton.StartHost();
+
+        NetworkServer.OnClientLeft += HandleClientLeft;
+
         NetworkManager.Singleton.SceneManager.LoadScene(GameSceneName, LoadSceneMode.Single);
+    }
+
+    private async void HandleClientLeft(string authId)
+    {
+        try
+        {
+            await LobbyService.Instance.RemovePlayerAsync(lobbyId, authId);
+        }
+        catch (LobbyServiceException ex)
+        {
+            Debug.LogError($"Lobby service error on handle client left: {ex.Message}");
+        }
     }
 
     private IEnumerator HeartbeatLobby(float waitTimeSeconds)
@@ -99,6 +114,11 @@ public class HostGameManager : IAsyncDisposable
     }
 
     public async ValueTask DisposeAsync()
+    {
+        await ShutDown();
+    }
+
+    public async Task ShutDown()
     {
         HostSingleton.Instance.StopCoroutine(nameof(HeartbeatLobby));
 
@@ -115,6 +135,8 @@ public class HostGameManager : IAsyncDisposable
 
             lobbyId = string.Empty;
         }
+
+        NetworkServer.OnClientLeft -= HandleClientLeft;
 
         NetworkServer?.Dispose();
     }

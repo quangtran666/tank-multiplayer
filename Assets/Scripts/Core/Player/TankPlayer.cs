@@ -8,8 +8,11 @@ public class TankPlayer : NetworkBehaviour
 {
     [SerializeField] private CinemachineCamera cinemachineCamera;
     [SerializeField] private int ownerPriority = 11;
+    [SerializeField] private SpriteRenderer minimapIconRenderer;
+
     [field: SerializeField] public Health Health { get; private set; }
     [field: SerializeField] public CoinsWallet CoinsWallet { get; private set; }
+    [SerializeField] private Color ownerColor;
 
     public NetworkVariable<FixedString32Bytes> PlayerName = new();
 
@@ -28,6 +31,7 @@ public class TankPlayer : NetworkBehaviour
         if (!IsOwner) return;
 
         cinemachineCamera.Priority = ownerPriority;
+        minimapIconRenderer.color = ownerColor;
     }
 
     public override void OnNetworkDespawn()
