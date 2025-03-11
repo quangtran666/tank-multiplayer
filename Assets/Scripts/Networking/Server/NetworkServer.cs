@@ -17,7 +17,6 @@ public class NetworkServer : IDisposable
         networkManager.OnServerStarted += OnNetworkReady;
     }
 
-
     private void ApprovalCheck(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
         var payload = System.Text.Encoding.UTF8.GetString(request.Payload);
@@ -27,6 +26,8 @@ public class NetworkServer : IDisposable
         AuthIDToUserData[userData.UserAuthID] = userData;
 
         response.Approved = true;
+        response.Position = SpawnPoint.GetRandomSpawnPos();
+        response.Rotation = Quaternion.identity;
         response.CreatePlayerObject = true;
     }
 
@@ -42,6 +43,16 @@ public class NetworkServer : IDisposable
             ClientIdToAuthId.Remove(clientID);
             AuthIDToUserData.Remove(authId);
         }
+    }
+
+    public UserData GetUserDataByClientID(ulong clientID)
+    {
+        if (ClientIdToAuthId.TryGetValue(clientID, out var authId) && AuthIDToUserData.TryGetValue(authId, out var userData))
+        {
+            return userData;
+        }
+
+        return null;
     }
 
     public void Dispose()

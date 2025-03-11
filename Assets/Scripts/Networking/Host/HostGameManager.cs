@@ -21,7 +21,7 @@ public class HostGameManager : IAsyncDisposable
     private const int MaxConnections = 20;
     private string joinCode;
     private string lobbyId;
-    private NetworkServer networkServer;
+    public NetworkServer NetworkServer { get; private set; }
 
     public async Task StartHostAsync()
     {
@@ -82,7 +82,7 @@ public class HostGameManager : IAsyncDisposable
         var payload = System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(userData));
         NetworkManager.Singleton.NetworkConfig.ConnectionData = payload;
 
-        networkServer = new NetworkServer(NetworkManager.Singleton);
+        NetworkServer = new NetworkServer(NetworkManager.Singleton);
 
         NetworkManager.Singleton.StartHost();
         NetworkManager.Singleton.SceneManager.LoadScene(GameSceneName, LoadSceneMode.Single);
@@ -116,6 +116,6 @@ public class HostGameManager : IAsyncDisposable
             lobbyId = string.Empty;
         }
 
-        networkServer?.Dispose();
+        NetworkServer?.Dispose();
     }
 }
